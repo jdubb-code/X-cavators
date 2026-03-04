@@ -56,6 +56,8 @@ struct GameView: View {
                     x: viewModel.worldSize.width / 2 - geometry.size.width / 2 - viewModel.cameraOffset.x,
                     y: viewModel.worldSize.height / 2 - geometry.size.height / 2 - viewModel.cameraOffset.y
                 )
+                .frame(width: geometry.size.width, height: geometry.size.height)
+                .clipped()
 
                 VStack {
                     HStack {

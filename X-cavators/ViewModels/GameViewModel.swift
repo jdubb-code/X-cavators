@@ -144,7 +144,7 @@ class GameViewModel: ObservableObject {
         let homeBaseExclusion: CGFloat = 200
         let maxAttempts = 100
 
-        let defs: [(minR: CGFloat, maxR: CGFloat, type: Hazard.HazardType, count: Int)] = [
+        let defs: [(minR: CGFloat, maxR: CGFloat, type: HazardType, count: Int)] = [
             (20, 35, .rock,   numberOfRocks),
             (25, 40, .puddle, numberOfPuddles),
             (40, 60, .mud,    numberOfMudPatches)
@@ -519,7 +519,16 @@ class GameViewModel: ObservableObject {
             }
         }
 
-        // Priority 2: Check if stuck and activate hazard avoidance (but not during rescanning)
+        // Priority 2: Proactive 20px avoidance — trigger before collision
+        if !isStuck && !isRescanningBackup && !isRescanningReturn && avoidanceWaypoint == nil {
+            if isApproachingHazard(detectionRange: 20) {
+                isStuck = true
+                isBackingUp = true
+                backupFrameCount = 0
+            }
+        }
+
+        // Priority 2b: Check if stuck and activate hazard avoidance (but not during rescanning)
         if detectIfStuck() && !isStuck && !isRescanningBackup && !isRescanningReturn {
             isStuck = true
             isBackingUp = true
@@ -708,6 +717,19 @@ class GameViewModel: ObservableObject {
             }
         }
         lastValidPosition = rover.position
+        return false
+    }
+
+    // Returns true if the rover is within detectionRange pixels of any obstacle hazard boundary
+    private func isApproachingHazard(detectionRange: CGFloat) -> Bool {
+        for hazard in hazards where hazard.type.isObstacle {
+            let dx = rover.position.x - hazard.position.x
+            let dy = rover.position.y - hazard.position.y
+            let distance = sqrt(dx * dx + dy * dy)
+            if distance < hazard.radius + detectionRange {
+                return true
+            }
+        }
         return false
     }
 
