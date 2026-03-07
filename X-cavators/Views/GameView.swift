@@ -21,6 +21,8 @@ struct GameView: View {
     var body: some View {
         GeometryReader { geometry in
             ZStack {
+                Color.black.ignoresSafeArea()
+
                 // World container (scrolls with camera)
                 ZStack {
                     MapView()
@@ -57,7 +59,6 @@ struct GameView: View {
                     y: viewModel.worldSize.height / 2 - geometry.size.height / 2 - viewModel.cameraOffset.y
                 )
                 .frame(width: geometry.size.width, height: geometry.size.height)
-                .clipped()
 
                 VStack {
                     HStack {
@@ -392,12 +393,16 @@ struct GameView: View {
                     .zIndex(2000)
                 }
 
+            }
+            .overlay {
                 // Repair Modal (highest priority)
                 if viewModel.needsRepair {
                     RepairModalView(
                         damage: viewModel.damage,
                         coins: viewModel.coins,
                         canAffordRepair: viewModel.canAffordRepair,
+                        screenHeight: geometry.size.height,
+                        screenWidth: geometry.size.width,
                         onRepair: {
                             viewModel.repairRover()
                         },
@@ -409,7 +414,6 @@ struct GameView: View {
                     )
                     .transition(.scale.combined(with: .opacity))
                     .animation(.easeInOut(duration: 0.3), value: viewModel.needsRepair)
-                    .zIndex(3000)
                 }
 
                 // Battery Depleted Modal (manual mode only)
@@ -428,13 +432,13 @@ struct GameView: View {
                     )
                     .transition(.scale.combined(with: .opacity))
                     .animation(.easeInOut(duration: 0.3), value: viewModel.batteryDepleted)
-                    .zIndex(2500)
                 }
 
                 // Trivia Modal (above repair/battery modals)
                 if viewModel.showingTrivia {
                     TriviaModalView(
                         questions: triviaQuestions,
+                        screenWidth: geometry.size.width,
                         onSuccess: {
                             triviaSuccessAction?()
                             triviaSuccessAction = nil
@@ -447,10 +451,8 @@ struct GameView: View {
                     )
                     .transition(.scale.combined(with: .opacity))
                     .animation(.easeInOut(duration: 0.3), value: viewModel.showingTrivia)
-                    .zIndex(3500)
                 }
             }
-            .clipped()
             .onAppear {
                 viewModel.startGame(size: geometry.size)
             }

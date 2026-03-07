@@ -9,6 +9,7 @@ import SwiftUI
 
 struct TriviaModalView: View {
     let questions: [TriviaQuestion]     // Exactly 2, pre-selected
+    let screenWidth: CGFloat
     let onSuccess: () -> Void           // Called when both questions answered correctly
     let onDismiss: () -> Void           // Back to repair modal / try again
 
@@ -28,28 +29,37 @@ struct TriviaModalView: View {
         ZStack {
             Color.black.opacity(0.85)
                 .ignoresSafeArea()
-
-            VStack(spacing: 24) {
-                headerView
-
-                if sessionFailed {
-                    failureView
-                } else {
-                    questionView
+            GeometryReader { geometry in
+                ScrollView {
+                    VStack {
+                        Spacer(minLength: 0)
+                        VStack(spacing: 24) {
+                            headerView
+                            if sessionFailed {
+                                failureView
+                            } else {
+                                questionView
+                            }
+                        }
+                        .padding(30)
+                        .background(
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(Color.black.opacity(0.9))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .stroke(mintAccent, lineWidth: 3)
+                                )
+                        )
+                        .shadow(color: mintAccent.opacity(0.5), radius: 30, x: 0, y: 10)
+                        .padding(.horizontal, 16)
+                        .frame(maxWidth: min(450, screenWidth - 44))
+                        .frame(maxWidth: .infinity)
+                        Spacer(minLength: 0)
+                    }
+                    .frame(minHeight: geometry.size.height)
+                    .padding(.horizontal, 12)
                 }
             }
-            .padding(30)
-            .frame(maxWidth: 450)
-            .background(
-                RoundedRectangle(cornerRadius: 20)
-                    .fill(Color.black.opacity(0.9))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 20)
-                            .stroke(mintAccent, lineWidth: 3)
-                    )
-            )
-            .shadow(color: mintAccent.opacity(0.5), radius: 30, x: 0, y: 10)
-            .padding(.horizontal, 40)
         }
     }
 
